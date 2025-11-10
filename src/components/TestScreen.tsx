@@ -33,7 +33,7 @@ export const TestScreen = ({ userId, onComplete }: TestScreenProps) => {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
       // Все вопросы отвечены, завершаем тест
-      handleComplete(0) // Временное значение, реальный подсчет в handleComplete
+      handleComplete()
     }
   }
 
@@ -43,7 +43,7 @@ export const TestScreen = ({ userId, onComplete }: TestScreenProps) => {
     }
   }
 
-  const handleComplete = async (score: number) => {
+  const handleComplete = async () => {
     // Последний вопрос (25-й) позитивный, поэтому инвертируем его оценку
     const adjustedAnswers = [...answers]
     if (adjustedAnswers[24] !== -1) {
