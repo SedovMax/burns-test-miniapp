@@ -3,7 +3,11 @@ import { TestScreen } from './components/TestScreen'
 import { ResultsScreen } from './components/ResultsScreen'
 import { HistoryScreen } from './components/HistoryScreen'
 import { DevTools } from './components/DevTools'
-import { supabase } from './lib/supabase'
+import {
+  ensureTelegramReady,
+  getTelegramDebugInfo,
+  getTelegramUserId
+} from './lib/telegram'
 import './App.css'
 
 type Screen = 'test' | 'results' | 'history'
@@ -24,39 +28,34 @@ function App() {
 
   useEffect(() => {
     console.log('🔍 Инициализация приложения...')
-    console.log('Проверка Telegram Web App:', {
-      hasTelegram: !!window.Telegram,
-      hasWebApp: !!window.Telegram?.WebApp,
-      initData: window.Telegram?.WebApp?.initDataUnsafe
-    })
+    const debugInfo = getTelegramDebugInfo()
+    console.log('Проверка Telegram Web App:', debugInfo)
 
-    // Проверяем, действительно ли мы в Telegram (проверяем наличие user в initData)
-    const tg = window.Telegram?.WebApp
-    const initData = tg?.initDataUnsafe
-    const hasTelegramUser = initData?.user?.id
+    const telegramUserId = getTelegramUserId()
 
-    if (hasTelegramUser) {
-      // Мы в Telegram - используем реальный userId
-      const telegramUserId = initData.user.id.toString()
+    if (telegramUserId) {
       console.log('✅ Обнаружен Telegram, используем userId из Telegram:', telegramUserId)
-      tg.ready()
-      tg.expand()
+      ensureTelegramReady()
       setUserId(telegramUserId)
+      return
+    }
+
+    if (debugInfo.hasTelegram) {
+      console.log('⚠️ Telegram WebApp доступен, но пользователь не найден в initData')
     } else {
-      // Локальное тестирование - создаем или используем тестовый userId
       console.log('🌐 Локальный режим (не в Telegram)')
-      const localUserId = localStorage.getItem('test_user_id')
-      
-      if (localUserId) {
-        console.log('📋 Используется сохраненный тестовый userId:', localUserId)
-        setUserId(localUserId)
-      } else {
-        // Создаем новый тестовый userId
-        const newUserId = 'test_' + Date.now()
-        localStorage.setItem('test_user_id', newUserId)
-        console.log('✨ Создан новый тестовый userId:', newUserId)
-        setUserId(newUserId)
-      }
+    }
+
+    const localUserId = localStorage.getItem('test_user_id')
+
+    if (localUserId) {
+      console.log('📋 Используется сохраненный тестовый userId:', localUserId)
+      setUserId(localUserId)
+    } else {
+      const newUserId = 'test_' + Date.now()
+      localStorage.setItem('test_user_id', newUserId)
+      console.log('✨ Создан новый тестовый userId:', newUserId)
+      setUserId(newUserId)
     }
   }, [])
 

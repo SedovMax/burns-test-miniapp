@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { isSupabaseConfigured } from '../lib/supabase'
+import { getTelegramUserId } from '../lib/telegram'
 import './DevTools.css'
 
 interface DevToolsProps {
@@ -13,7 +14,7 @@ export const DevTools = ({ userId, onUserIdChange }: DevToolsProps) => {
 
   // Показываем только в режиме разработки (не в Telegram)
   // Проверяем наличие реального пользователя Telegram, а не просто скрипта
-  const hasTelegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+  const hasTelegramUser = getTelegramUserId()
   if (hasTelegramUser) {
     return null
   }
